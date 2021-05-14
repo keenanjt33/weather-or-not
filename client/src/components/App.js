@@ -12,6 +12,9 @@ function App() {
 class WeatherOrNot extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      forecast: null,
+    };
   }
 
   async componentDidMount() {
@@ -26,7 +29,7 @@ class WeatherOrNot extends React.Component {
         console.log(res);
         return res.json();
       })
-      .then((forecast) => console.log(forecast));
+      .then((forecast) => this.setState({ forecast }));
   }
 
   render() {
@@ -34,7 +37,7 @@ class WeatherOrNot extends React.Component {
       <div>
         <Header />
         <SearchBar />
-        <Forecast />
+        {this.state.forecast && <Forecast forecast={this.state.forecast} />}
       </div>
     );
   }
@@ -63,8 +66,29 @@ function SearchBar() {
   );
 }
 
-function Forecast() {
-  return <div></div>;
-}
+const Forecast = (props) => {
+  let threeDays = props.forecast.DailyForecasts.slice(0, 3);
+  return (
+    <div>
+      {threeDays.map((day) => (
+        <WeatherCard forecast={day} />
+      ))}
+    </div>
+  );
+};
+
+const WeatherCard = (props) => {
+  const dateObj = new Date(props.forecast.Date);
+  const dateString = `${dateObj.toLocaleString('default', {
+    weekday: 'long',
+  })} ${dateObj.toLocaleString('default', {
+    month: 'short',
+  })} ${dateObj.getDate()}`;
+  return (
+    <div>
+      <h2>{dateString}</h2>
+    </div>
+  );
+};
 
 export default App;
