@@ -1,5 +1,7 @@
 const express = require('express');
 const fetch = require('node-fetch');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const { FORECASTS_DATA } = require('./example-data');
 
@@ -8,19 +10,31 @@ require('dotenv').config();
 const app = express();
 const port = 3001;
 
+const apiLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 30,
+});
+
+// sets http headers for security
+//   (recommended per: https://expressjs.com/en/advanced/best-practice-security.html)
+app.use(helmet());
+
+app.use('/api/', apiLimiter);
+
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
 app.get('/api/forecast/ip', (req, res) => {
+  console.log(req.query.q);
   // ---- begin stub ----
-  return res.send(JSON.stringify(FORECASTS_DATA));
+  return res.json(FORECASTS_DATA);
   // ---- end stub ----
 });
 
 app.get('/api/forecast/text', (req, res) => {
   // ---- begin stub ----
-  return res.send(JSON.stringify(FORECASTS_DATA));
+  return res.json(FORECASTS_DATA);
   // ---- end stub ----
 
   // fetch(
