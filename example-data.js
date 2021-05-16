@@ -376,6 +376,7 @@ const LOCATIONS_DATA = [
 ];
 
 const FORECASTS_DATA = {
+  Location: LOCATIONS_DATA[0],
   Headline: {
     EffectiveDate: '2021-05-15T14:00:00-04:00',
     EffectiveEpochDate: 1621101600,

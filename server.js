@@ -19,36 +19,48 @@ const apiLimiter = rateLimit({
 //   (recommended per: https://expressjs.com/en/advanced/best-practice-security.html)
 app.use(helmet());
 
+app.set('trust proxy', 1);
 app.use('/api/', apiLimiter);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.get('/api/forecast/ip', (req, res) => {
-  console.log(req.query.q);
+app.get('/api/forecast/ip', async (req, res) => {
   // ---- begin stub ----
-  return res.json(FORECASTS_DATA);
+  // return res.json(FORECASTS_DATA);
   // ---- end stub ----
+
+  let response = await fetch(
+    `https://dataservice.accuweather.com/locations/v1/cities/ipaddress?q=${req.query.ip}&apikey=${process.env.WEATHER_KEY}`
+  );
+  const location = await response.json();
+  if (!location) res.status(500);
+  response = await fetch(
+    `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${location.Key}.json?apikey=${process.env.WEATHER_KEY}`
+  );
+  const forecast = await response.json();
+  forecast.Location = location;
+  return res.json(forecast);
 });
 
-app.get('/api/forecast/text', (req, res) => {
+app.get('/api/forecast/text', async (req, res) => {
   // ---- begin stub ----
-  return res.json(FORECASTS_DATA);
+  // return res.json(FORECASTS_DATA);
   // ---- end stub ----
 
-  // fetch(
-  //   `https://dataservice.accuweather.com/locations/v1/search?q=${req.query.q}&apikey=${process.env.WEATHER_KEY}`
-  // )
-  //   .then((locationsRes) => locationsRes.json())
-  //   .then((locations) => locations[0].Key)
-  //   .then((locationKey) =>
-  //     fetch(
-  //       `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}.json?apikey=${process.env.WEATHER_KEY}`
-  //     )
-  //   )
-  //   .then((forecastsRes) => res.json(forecastsRes.json()));
-  // .then((forecast) => res.send(JSON.stringify(forecast)));
+  let response = await fetch(
+    `https://dataservice.accuweather.com/locations/v1/search?q=${req.query.q}&apikey=${process.env.WEATHER_KEY}`
+  );
+  const locations = await response.json();
+  if (locations.length === 0) res.send(500);
+  const [location] = locations;
+  response = await fetch(
+    `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${location.Key}.json?apikey=${process.env.WEATHER_KEY}`
+  );
+  const forecast = await response.json();
+  forecast.Location = location;
+  res.json(forecast);
 });
 
 app.listen(port, () => {
