@@ -25,7 +25,7 @@ then register an [app](https://developer.accuweather.com/user/me/apps)
 Create a file called `.env` in the project's root directory and add the line:
 
 ```
-WEATHER_KEY='<accuweather_app_api_key>'
+WEATHER_KEY=<accuweather_app_api_key>
 ```
 
 Where `<accuweather_app_api_key>` is the API key registered to your AccuWeather
